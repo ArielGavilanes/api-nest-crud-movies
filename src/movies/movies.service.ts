@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Movies } from './entity/movies.entity';
 import { Repository } from 'typeorm';
@@ -12,30 +16,70 @@ export class MoviesService {
   ) {}
 
   async getAllMovies(): Promise<MoviesI[]> {
-    return await this.moviesRepository.find();
+    const movies = await this.moviesRepository.find();
+    if (!movies || movies.length == 0) {
+      throw new NotFoundException('No existen registros');
+    }
+    return movies;
   }
 
   async getMovieById(id_pelicula: number): Promise<MoviesI> {
-    return await this.moviesRepository.findOne({
+    const user = await this.moviesRepository.findOne({
       where: {
         id_pelicula: id_pelicula,
       },
     });
+    if (!user) {
+      throw new NotFoundException('No existe el registro ' + id_pelicula);
+    }
+
+    return user;
   }
 
   async createMovie(movie: MoviesDto): Promise<any> {
-    const newMovie = await this.moviesRepository.create(movie);
-    return await this.moviesRepository.save(newMovie);
+    try {
+      const newMovie = await this.moviesRepository.create(movie);
+      return await this.moviesRepository.save(newMovie);
+    } catch (error) {
+      throw new BadRequestException('No se ha podido crear el registro', error);
+    }
   }
 
   async updateMovie(
     id_pelicula: number,
     movie: Partial<MoviesDto>,
   ): Promise<any> {
-    return await this.moviesRepository.update(id_pelicula, movie);
+    try {
+      return await this.moviesRepository.update(id_pelicula, movie);
+    } catch (error) {
+      throw new BadRequestException(
+        'No se ha podido actualizar el registro ' + id_pelicula,
+        error,
+      );
+    }
   }
 
   async deleteMovie(id_pelicula: number): Promise<void> {
-    await this.moviesRepository.delete(id_pelicula);
+    const user = await this.getMovieById(id_pelicula);
+    if (user) {
+      await this.moviesRepository.delete(id_pelicula);
+    }
+    throw new NotFoundException(
+      'No se puede eliminar el registro' + id_pelicula,
+    );
+  }
+
+  async partiallyUpdateMovie(
+    id_pelicula: number,
+    movie: Partial<MoviesDto>,
+  ): Promise<any> {
+    try {
+      return await this.moviesRepository.update(id_pelicula, movie);
+    } catch (error) {
+      throw new BadRequestException(
+        'No se ha podido actualizar parcialmente el registro ' + id_pelicula,
+        error,
+      );
+    }
   }
 }

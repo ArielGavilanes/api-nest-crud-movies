@@ -7,6 +7,10 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  HttpStatus,
+  ValidationPipe,
+  UsePipes,
+  Patch,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { MoviesDto } from './dto/movies.dto';
@@ -21,25 +25,55 @@ export class MoviesController {
   }
 
   @Get(':id_pelicula')
-  getMovieById(@Param('id_pelicula', ParseIntPipe) id_pelicula: number) {
+  getMovieById(
+    @Param(
+      'id_pelicula',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id_pelicula: number,
+  ) {
     return this.moviesService.getMovieById(id_pelicula);
   }
 
   @Post()
+  @UsePipes(new ValidationPipe())
   createMovie(@Body() movie: MoviesDto) {
     return this.moviesService.createMovie(movie);
   }
 
   @Put(':id_pelicula')
+  @UsePipes(new ValidationPipe())
   updateMovie(
-    @Param('id_pelicula', ParseIntPipe) id_pelicula: number,
+    @Param(
+      'id_pelicula',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id_pelicula: number,
     @Body() movie: Partial<MoviesDto>,
   ) {
     return this.moviesService.updateMovie(id_pelicula, movie);
   }
 
+  @Patch(':id_pelicula')
+  partiallyUpdateMovie(
+    @Param(
+      'id_pelicula',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id_pelicula: number,
+    @Body() movie: Partial<MoviesDto>,
+  ) {
+    return this.moviesService.partiallyUpdateMovie(id_pelicula, movie);
+  }
+
   @Delete(':id_pelicula')
-  deleteMovie(@Param('id_pelicula', ParseIntPipe) id_pelicula: number) {
+  deleteMovie(
+    @Param(
+      'id_pelicula',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id_pelicula: number,
+  ) {
     return this.moviesService.deleteMovie(id_pelicula);
   }
 }
