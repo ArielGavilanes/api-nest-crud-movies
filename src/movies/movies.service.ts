@@ -37,6 +37,17 @@ export class MoviesService {
   }
 
   async createMovie(movie: MoviesDto): Promise<any> {
+    if (movie.id_pelicula) {
+      const userFound = await this.moviesRepository.findOne({
+        where: {
+          id_pelicula: movie.id_pelicula,
+        },
+      });
+      if (userFound) {
+        throw new BadRequestException('Este pelicula ya existe');
+      }
+    }
+
     try {
       const newMovie = await this.moviesRepository.create(movie);
       return await this.moviesRepository.save(newMovie);

@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { MoviesDto } from './dto/movies.dto';
+import { UpdateMovieDto } from './dto/updateMovies.dto';
 
 @Controller('movies')
 export class MoviesController {
@@ -49,7 +50,7 @@ export class MoviesController {
       new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
     )
     id_pelicula: number,
-    @Body() movie: Partial<MoviesDto>,
+    @Body() movie: UpdateMovieDto,
   ) {
     return this.moviesService.updateMovie(id_pelicula, movie);
   }
@@ -61,7 +62,7 @@ export class MoviesController {
       new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
     )
     id_pelicula: number,
-    @Body() movie: Partial<MoviesDto>,
+    @Body() movie: UpdateMovieDto,
   ) {
     return this.moviesService.partiallyUpdateMovie(id_pelicula, movie);
   }
